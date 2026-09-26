@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { SessionUser } from "@/lib/session";
 
 const ICONS: { key: string; label: string; path: string }[] = [
   { key: "home", label: "Home", path: "M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z" },
@@ -22,8 +23,9 @@ const ICONS: { key: string; label: string; path: string }[] = [
   },
 ];
 
-export default function BottomNav() {
+export default function BottomNav({ user }: { user: SessionUser | null }) {
   const [active, setActive] = useState("home");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-between px-4 pb-3 pt-2 bg-gradient-to-t from-black/60 to-transparent">
@@ -37,6 +39,55 @@ export default function BottomNav() {
             <div className="absolute right-0 h-8 w-8 rounded-md bg-pink-500" />
             <div className="absolute inset-x-0 mx-auto h-8 w-9 rounded-md bg-white" />
           </button>
+        ) : icon.key === "profile" ? (
+          user ? (
+            <div key={icon.key} className="pointer-events-auto relative">
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex flex-col items-center gap-0.5 text-white"
+              >
+                {user.picture ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.picture}
+                    alt=""
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
+                    <path d={icon.path} />
+                  </svg>
+                )}
+                <span className="max-w-14 truncate text-[10px] font-medium">
+                  {user.name}
+                </span>
+              </button>
+              {menuOpen && (
+                <form
+                  action="/api/auth/logout"
+                  method="post"
+                  className="absolute bottom-full right-0 mb-2"
+                >
+                  <button className="whitespace-nowrap rounded-md bg-white px-3 py-2 text-sm font-semibold text-black shadow">
+                    Log out
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <a
+              key={icon.key}
+              href="/login"
+              className="pointer-events-auto flex flex-col items-center gap-0.5 text-white"
+            >
+              <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white/60">
+                <path d={icon.path} />
+              </svg>
+              <span className="text-[10px] font-medium text-white/60">
+                Log in
+              </span>
+            </a>
+          )
         ) : (
           <button
             key={icon.key}
